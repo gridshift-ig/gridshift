@@ -1,29 +1,255 @@
 {
   "feeds": [
-    {"id": "jalopnik", "name": "Jalopnik", "url": "https://www.jalopnik.com/feed", "homepage": "https://www.jalopnik.com", "verified": true},
-    {"id": "thedrive", "name": "The Drive", "url": "https://www.thedrive.com/feed", "homepage": "https://www.thedrive.com", "verified": true},
-    {"id": "motorsport", "name": "Motorsport.com", "url": "https://www.motorsport.com/rss/all/news/", "homepage": "https://www.motorsport.com", "verified": true, "note": "Racing news incl. WEC/IMSA results coverage."},
-    {"id": "hagerty", "name": "Hagerty", "url": "https://www.hagerty.com/media/feed/", "homepage": "https://www.hagerty.com/media", "verified": true, "note": "Classic/enthusiast features and reviews."},
-    {"id": "autoblog", "name": "Autoblog", "url": "https://www.autoblog.com/rss.xml", "homepage": "https://www.autoblog.com", "verified": false, "note": "Works generally but 403s from GitHub Actions IPs; skipped gracefully there."},
-    {"id": "caranddriver", "name": "Car and Driver", "url": "https://www.caranddriver.com/rss/all.xml/", "homepage": "https://www.caranddriver.com", "verified": false, "note": "Hearst site; may 403 from GitHub IPs. Skipped gracefully if so."},
-    {"id": "roadandtrack", "name": "Road & Track", "url": "https://www.roadandtrack.com/rss/all.xml/", "homepage": "https://www.roadandtrack.com", "verified": false, "note": "Hearst site; may 403 from GitHub IPs. Skipped gracefully if so."},
-    {"id": "evo", "name": "evo", "url": "https://www.evo.co.uk/rss", "homepage": "https://www.evo.co.uk/news", "verified": false, "note": "No public RSS found; skipped until a real URL is added."},
-    {"id": "carmagazine", "name": "CAR Magazine", "url": "https://www.carmagazine.co.uk/rss", "homepage": "https://www.carmagazine.co.uk", "verified": false, "note": "No public RSS found; skipped until a real URL is added."},
-    {"id": "yt_dougdemuro", "name": "Doug DeMuro", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsqjHFMB_JYTaEnf_vmTNqg", "homepage": "https://www.youtube.com/@DougDeMuro", "verified": true},
-    {"id": "yt_throttlehouse", "name": "Throttle House", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCyXiDU5qjfOPxgOPeFWGwKw", "homepage": "https://www.youtube.com/@ThrottleHouse", "verified": true},
-    {"id": "yt_carfection", "name": "Carfection", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCwuDqQjo53xnxWKRVfw_41w", "homepage": "https://www.youtube.com/@Carfection", "verified": true},
-    {"id": "yt_harrysgarage", "name": "Harry's Garage", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCIB5XXHNAWWzTOw6guIMYCg", "homepage": "https://www.youtube.com/@harrysgarage", "verified": true},
-    {"id": "yt_jasoncammisa", "name": "Jason Cammisa", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC5ycxRlaGXSjt3CxZ3Q59zw", "homepage": "https://www.youtube.com/@JasonCammisa", "verified": true},
-    {"id": "yt_chrisharris", "name": "Chris Harris", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC8AMAhCRmep7VJKe1sxvHFg", "homepage": "https://www.youtube.com/@ChrisHarrisOnCars", "verified": true},
-    {"id": "yt_hagerty", "name": "Hagerty TV", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLgEVx4mzk3T3mzgbKG54Eg", "homepage": "https://www.youtube.com/@Hagerty", "verified": true}
+    {
+      "id": "jalopnik",
+      "name": "Jalopnik",
+      "url": "https://www.jalopnik.com/feed",
+      "homepage": "https://www.jalopnik.com",
+      "verified": true
+    },
+    {
+      "id": "thedrive",
+      "name": "The Drive",
+      "url": "https://www.thedrive.com/feed",
+      "homepage": "https://www.thedrive.com",
+      "verified": true
+    },
+    {
+      "id": "motorsport",
+      "name": "Motorsport.com",
+      "url": "https://www.motorsport.com/rss/all/news/",
+      "homepage": "https://www.motorsport.com",
+      "verified": true,
+      "note": "Racing news incl. WEC/IMSA results coverage."
+    },
+    {
+      "id": "hagerty",
+      "name": "Hagerty",
+      "url": "https://www.hagerty.com/media/feed/",
+      "homepage": "https://www.hagerty.com/media",
+      "verified": true,
+      "note": "Classic/enthusiast features and reviews."
+    },
+    {
+      "id": "autoblog",
+      "name": "Autoblog",
+      "url": "https://www.autoblog.com/rss.xml",
+      "homepage": "https://www.autoblog.com",
+      "verified": false,
+      "note": "Works generally but 403s from GitHub Actions IPs; skipped gracefully there."
+    },
+    {
+      "id": "caranddriver",
+      "name": "Car and Driver",
+      "url": "https://www.caranddriver.com/rss/all.xml/",
+      "homepage": "https://www.caranddriver.com",
+      "verified": false,
+      "note": "Hearst site; may 403 from GitHub IPs. Skipped gracefully if so."
+    },
+    {
+      "id": "roadandtrack",
+      "name": "Road & Track",
+      "url": "https://www.roadandtrack.com/rss/all.xml/",
+      "homepage": "https://www.roadandtrack.com",
+      "verified": false,
+      "note": "Hearst site; may 403 from GitHub IPs. Skipped gracefully if so."
+    },
+    {
+      "id": "evo",
+      "name": "evo",
+      "url": "https://www.evo.co.uk/rss",
+      "homepage": "https://www.evo.co.uk/news",
+      "verified": false,
+      "note": "No public RSS found; skipped until a real URL is added."
+    },
+    {
+      "id": "carmagazine",
+      "name": "CAR Magazine",
+      "url": "https://www.carmagazine.co.uk/rss",
+      "homepage": "https://www.carmagazine.co.uk",
+      "verified": false,
+      "note": "No public RSS found; skipped until a real URL is added."
+    },
+    {
+      "id": "yt_dougdemuro",
+      "name": "Doug DeMuro",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsqjHFMB_JYTaEnf_vmTNqg",
+      "homepage": "https://www.youtube.com/@DougDeMuro",
+      "verified": true
+    },
+    {
+      "id": "yt_throttlehouse",
+      "name": "Throttle House",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCyXiDU5qjfOPxgOPeFWGwKw",
+      "homepage": "https://www.youtube.com/@ThrottleHouse",
+      "verified": true
+    },
+    {
+      "id": "yt_carfection",
+      "name": "Carfection",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCwuDqQjo53xnxWKRVfw_41w",
+      "homepage": "https://www.youtube.com/@Carfection",
+      "verified": true
+    },
+    {
+      "id": "yt_harrysgarage",
+      "name": "Harry's Garage",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCIB5XXHNAWWzTOw6guIMYCg",
+      "homepage": "https://www.youtube.com/@harrysgarage",
+      "verified": true
+    },
+    {
+      "id": "yt_jasoncammisa",
+      "name": "Jason Cammisa",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC5ycxRlaGXSjt3CxZ3Q59zw",
+      "homepage": "https://www.youtube.com/@JasonCammisa",
+      "verified": true
+    },
+    {
+      "id": "yt_chrisharris",
+      "name": "Chris Harris",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC8AMAhCRmep7VJKe1sxvHFg",
+      "homepage": "https://www.youtube.com/@ChrisHarrisOnCars",
+      "verified": true
+    },
+    {
+      "id": "yt_hagerty",
+      "name": "Hagerty TV",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLgEVx4mzk3T3mzgbKG54Eg",
+      "homepage": "https://www.youtube.com/@Hagerty",
+      "verified": true
+    }
   ],
-  "evPerformance": {
-    "label": "EVs in Performance",
-    "evTerms": ["ev", "evs", "electric", "battery", "battery-electric", "bev", "kwh", "kw", "ev-only", "electrified", "plug-in", "plug in"],
-    "perfTerms": ["sports car", "sportscar", "supercar", "hypercar", "performance", "track", "horsepower", "hp", "bhp", "0-60", "0-62", "nurburgring", "lap record", "gt", "rs", "amg", "m3", "m5", "type r", "motorsport", "race", "racing", "quad-motor", "tri-motor", "dual-motor", "launch control"]
-  },
-  "wagon": {
-    "label": "Wagon Watch",
-    "terms": ["wagon", "wagons", "estate", "estate car", "avant", "touring", "shooting brake", "sportwagen", "sport wagen", "sportbrake", "allroad", "alltrack", "outback", "cross country", "variant", "caravan", "longroof", "long roof", "station wagon"]
+  "categories": {
+    "_order": [
+      "racing",
+      "wagon",
+      "performance"
+    ],
+    "_backfill": "performance",
+    "racing": {
+      "label": "Racing",
+      "terms": [
+        "racing",
+        "race",
+        "motorsport",
+        "motorsports",
+        "f1",
+        "formula 1",
+        "formula one",
+        "grand prix",
+        "qualifying",
+        "pole position",
+        "podium",
+        "le mans",
+        "wec",
+        "imsa",
+        "nascar",
+        "indycar",
+        "indy 500",
+        "rally",
+        "wrc",
+        "rallycross",
+        "endurance race",
+        "championship",
+        "daytona",
+        "sebring",
+        "spa",
+        "monza",
+        "silverstone",
+        "hillclimb",
+        "time attack",
+        "lap record",
+        "fastest lap",
+        "race win",
+        "race weekend",
+        "pit lane",
+        "safety car"
+      ]
+    },
+    "wagon": {
+      "label": "Wagons",
+      "terms": [
+        "wagon",
+        "wagons",
+        "estate",
+        "estate car",
+        "avant",
+        "touring",
+        "shooting brake",
+        "sportwagen",
+        "sport wagen",
+        "sportbrake",
+        "allroad",
+        "alltrack",
+        "outback",
+        "cross country",
+        "variant",
+        "caravan",
+        "longroof",
+        "long roof",
+        "station wagon"
+      ]
+    },
+    "performance": {
+      "label": "Performance",
+      "terms": [
+        "sports car",
+        "sportscar",
+        "supercar",
+        "hypercar",
+        "performance",
+        "performance car",
+        "track",
+        "trackday",
+        "track day",
+        "horsepower",
+        "hp",
+        "bhp",
+        "0-60",
+        "0-62",
+        "quarter mile",
+        "nurburgring",
+        "nordschleife",
+        "lap time",
+        "gt",
+        "gt3 rs",
+        "rs",
+        "amg",
+        "m2",
+        "m3",
+        "m4",
+        "m5",
+        "type r",
+        "sti",
+        "gti",
+        "hot hatch",
+        "sports sedan",
+        "muscle car",
+        "launch control",
+        "twin-turbo",
+        "twin turbo",
+        "supercharged",
+        "v6",
+        "v8",
+        "v10",
+        "v12",
+        "flat-six",
+        "flat six",
+        "quad-motor",
+        "tri-motor",
+        "dual-motor",
+        "taycan",
+        "plaid",
+        "electric performance",
+        "performance ev",
+        "review",
+        "first drive",
+        "driven",
+        "road test",
+        "first look",
+        "tested"
+      ]
+    }
   }
 }

@@ -2,16 +2,15 @@
 """Generate a batch of review-ready Instagram posts from live car-news feeds.
 
   python generate.py            # build today's batch (default 3 posts)
-  python generate.py --count 2  # 2 posts
-  python generate.py --no-ev    # don't force an EV-performance pick
+  python generate.py --count 6  # 6 posts
+
+Each batch is one post per category (performance / racing / wagon). Empty
+racing or wagon slots are backfilled with an extra performance pick.
 
 Output (one folder per run, under posts/<YYYY-MM-DD_HHMM>/):
   post_1.jpg        branded card image (1080x1080)
   post_1.txt        caption + hashtags, ready to paste
   batch.json        machine-readable manifest (used by publish.py)
-
-Nothing is posted. Review the folder, delete any post you don't want, then
-publish manually, via a scheduler, or with publish.py once your Meta app is live.
 """
 from __future__ import annotations
 
@@ -23,16 +22,15 @@ from pathlib import Path
 from carnews.caption import build_caption
 from carnews.cards import render_card
 from carnews.feeds import fetch_all
-from carnews.select import select_batch
+from carnews.select import select_category_batch
 
 ROOT = Path(__file__).resolve().parent
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build a batch of Instagram car-news posts.")
-    ap.add_argument("--count", type=int, default=3, help="number of posts (default 3)")
-    ap.add_argument("--no-ev", action="store_true", help="do not force an EV-performance pick")
-    ap.add_argument("--no-wagon", action="store_true", help="do not force a wagon pick")
+    ap.add_argument("--count", type=int, default=3,
+                    help="posts per batch (default 3 = one per category)")
     args = ap.parse_args()
 
     print("Fetching feeds…")
@@ -43,8 +41,7 @@ def main() -> None:
         return
     print(f"\n{len(items)} stories from: {', '.join(ok_sources)}")
 
-    batch = select_batch(items, count=args.count, ensure_ev=not args.no_ev,
-                         ensure_wagon=not args.no_wagon)
+    batch = select_category_batch(items, count=args.count)
     if not batch:
         print("Nothing new to post (all candidates already posted).")
         return
@@ -64,13 +61,13 @@ def main() -> None:
                 "title": story["title"],
                 "source": story["source"],
                 "link": story["link"],
-                "ev_performance": bool(story.get("ev_performance")),
+                "category": story.get("category"),
                 "image_file": img.name,
                 "caption_file": f"post_{i}.txt",
                 "published": False,
             }
         )
-        tag = " [EV-perf]" if story.get("ev_performance") else (" [wagon]" if story.get("wagon") else "")
+        tag = f" [{story.get('category') or 'general'}]"
         print(f"  post_{i}: [{story['source']}]{tag} {story['title'][:70]}")
 
     (run_dir / "batch.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
