@@ -1,0 +1,62 @@
+name: Gridshift auto-post
+
+# Posts car-news cards to Instagram on a schedule.
+# Times are UTC. Three runs/day, one post each. Adjust the cron lines to taste.
+on:
+  schedule:
+    - cron: "0 13 * * *"   # morning US
+    - cron: "0 18 * * *"   # midday US
+    - cron: "0 23 * * *"   # evening US
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gridshift-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate a post
+        run: python generate.py --count 1 --no-ev --no-wagon
+
+      - name: Commit generated images (so Instagram can fetch them)
+        run: |
+          git config user.name "gridshift-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add posts/
+          git commit -m "Auto: generated post $(date -u +%FT%TZ)" || echo "nothing to commit"
+          git push
+
+      - name: Wait for raw CDN to serve the new images
+        run: sleep 45
+
+      - name: Publish to Instagram
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IMAGE_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/posts
+        run: |
+          DIR=$(ls -dt posts/*/ | head -1)
+          echo "Publishing $DIR"
+          python publish.py --dir "$DIR"
+
+      - name: Save updated post history
+        run: |
+          git add posts/
+          git commit -m "Auto: mark posted $(date -u +%FT%TZ)" || echo "nothing to commit"
+          git push
