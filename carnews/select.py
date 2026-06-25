@@ -5,10 +5,10 @@ Categories (config in feeds.json -> "categories"):
   racing       Motorsport / race coverage
   wagon        Wagons / estates / longroofs
 
-A daily batch is one post per category (3 total). The workflow runs the
-batch twice a day -> 6 posts/day, ~2 per category. When racing or wagon
-have nothing fresh, the slot is BACKFILLED with an extra performance pick
-so the account still posts a full batch.
+The workflow runs once every 3 hours (24/7) and posts ONE story per run,
+rotating performance -> racing -> wagon across runs (see generate.py
+--category auto). Empty racing/wagon slots are BACKFILLED with a
+performance pick so every run still posts.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ HISTORY = ROOT / "posts" / "_posted.json"
 CATS = CONFIG.get("categories", {})
 ORDER = CATS.get("_order", ["racing", "wagon", "performance"])
 BACKFILL = CATS.get("_backfill", "performance")
-# Category slots a daily batch tries to fill, in display order.
+# Category rotation order for single-post runs and multi-slot batches.
 SLOTS = ["performance", "racing", "wagon"]
 
 
@@ -89,13 +89,12 @@ def mark_posted(links: list) -> None:
     HISTORY.write_text(json.dumps(sorted(posted), indent=2), encoding="utf-8")
 
 
-def select_category_batch(items: list, count: int = 3) -> list:
-    """Pick one fresh story per category slot, backfilling empties.
+def select_for_slots(items: list, slots: list) -> list:
+    """Fill an ordered list of category slots with fresh, source-diverse picks.
 
-    For each slot in SLOTS we take the first fresh, source-diverse story in
-    that category. If none, we backfill with a BACKFILL-category pick, then
-    with any fresh story. Extra slots beyond the 3 categories (count > 3)
-    are filled from the backfill pool, then anything fresh.
+    Each slot takes the first fresh story of that category. If none is
+    available, the slot is backfilled with a BACKFILL-category pick, then
+    with any fresh story, so every slot is filled when content exists.
     """
     categorize(items)
     posted = _load_posted()
@@ -117,11 +116,6 @@ def select_category_batch(items: list, count: int = 3) -> list:
                     return True
         return False
 
-    slots = list(SLOTS)
-    while len(slots) < count:
-        slots.append(BACKFILL)
-    slots = slots[:count]
-
     for slot in slots:
         if take(lambda it, s=slot: it.get("category") == s):
             continue
@@ -129,7 +123,21 @@ def select_category_batch(items: list, count: int = 3) -> list:
             continue
         take(lambda it: True)
 
-    return chosen[:count]
+    return chosen
+
+
+def select_one(items: list, category: str) -> list:
+    """Pick a single fresh post of `category` (perf/any backfill)."""
+    return select_for_slots(items, [category])[:1]
+
+
+def select_category_batch(items: list, count: int = 3) -> list:
+    """Pick `count` posts, one per category slot, padding with backfill slots."""
+    slots = list(SLOTS)
+    while len(slots) < count:
+        slots.append(BACKFILL)
+    slots = slots[:count]
+    return select_for_slots(items, slots)[:count]
 
 
 # Back-compat: old signature used by anything still calling select_batch().
