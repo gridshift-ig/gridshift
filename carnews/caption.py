@@ -4,9 +4,20 @@ from __future__ import annotations
 import re
 
 BASE_TAGS = ["#cars", "#carnews", "#automotive", "#carsofinstagram", "#auto"]
-EV_TAGS = ["#ev", "#electriccars", "#evperformance"]
-PERF_TAGS = ["#performancecars", "#sportscar", "#supercar", "#horsepower"]
-WAGON_TAGS = ["#wagon", "#stationwagon", "#estatecar", "#longroof", "#wagonlife"]
+
+# Per-category hashtag sets (prepended so the lead tags match the category).
+CATEGORY_TAGS = {
+    "performance": ["#performancecars", "#sportscar", "#supercar", "#horsepower", "#carreview"],
+    "racing": ["#motorsport", "#racing", "#racecar", "#trackday", "#grandprix"],
+    "wagon": ["#wagon", "#stationwagon", "#estatecar", "#longroof", "#wagonlife"],
+}
+
+# Per-category one-line tagline shown in the caption body.
+CATEGORY_TAGLINE = {
+    "performance": "\U0001f3ce️ Performance review — ICE or electric, if it's fast it's here.",
+    "racing": "\U0001f3c1 Racing — results, drama and machinery from the track.",
+    "wagon": "\U0001f6fb Wagon Watch — for the longroof faithful.",
+}
 
 KEYWORD_TAGS = {
     "tesla": "#tesla", "porsche": "#porsche", "ferrari": "#ferrari",
@@ -38,12 +49,8 @@ def build_hashtags(story, max_tags=12):
     for kw, tag in KEYWORD_TAGS.items():
         if kw in hay and tag not in tags:
             tags.append(tag)
-    if story.get("ev_performance"):
-        tags = EV_TAGS + tags
-    elif any(t in hay for t in ("performance", "sports car", "supercar", "horsepower", "track")):
-        tags += [t for t in PERF_TAGS if t not in tags]
-    if story.get("wagon"):
-        tags = [t for t in WAGON_TAGS if t not in tags] + tags
+    cat_tags = CATEGORY_TAGS.get(story.get("category"), [])
+    tags = [t for t in cat_tags if t not in tags] + tags
     for t in BASE_TAGS:
         if t not in tags:
             tags.append(t)
@@ -58,11 +65,10 @@ def build_caption(story):
     if summary:
         lines += ["", summary]
     lines.append("")
-    if story.get("ev_performance"):
-        lines += ["⚡ Electric performance — where EVs meet the sports-car world.", ""]
-    elif story.get("wagon"):
-        lines += ["\U0001f6fb Wagon Watch — for the longroof faithful.", ""]
+    tagline = CATEGORY_TAGLINE.get(story.get("category"))
+    if tagline:
+        lines += [tagline, ""]
     lines.append(f"\U0001f4f0 Source: {source}. Full story via the link — read it, support the writers.")
-    lines.append("\U0001f449 Follow for daily car news, reviews, EV performance & wagons.")
+    lines.append("\U0001f449 Follow for daily performance reviews, racing & wagons.")
     lines += ["", " ".join(build_hashtags(story))]
     return "\n".join(lines)

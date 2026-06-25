@@ -18,11 +18,19 @@ BRAND = {
     "bg_top": (16, 18, 24),
     "bg_bottom": (32, 36, 48),
     "accent": (227, 30, 36),
-    "accent_ev": (0, 200, 140),
+    "accent_performance": (227, 30, 36),
+    "accent_racing": (0, 168, 255),
     "accent_wagon": (240, 176, 48),
     "text": (255, 255, 255),
     "muted": (170, 176, 188),
     "name": "GRIDSHIFT",
+}
+
+# Category -> (ribbon label, accent key)
+CATEGORY_RIBBON = {
+    "performance": ("PERFORMANCE", "accent_performance"),
+    "racing": ("RACING", "accent_racing"),
+    "wagon": ("WAGON WATCH", "accent_wagon"),
 }
 
 _FONT_CANDIDATES = {
@@ -81,9 +89,9 @@ def _fit_headline(draw, text, kind, max_width, start_size, min_size):
 
 def render_card(story, out_path, brand=None):
     b = {**BRAND, **(brand or {})}
-    is_ev = bool(story.get("ev_performance"))
-    is_wagon = bool(story.get("wagon")) and not is_ev
-    accent = b["accent_ev"] if is_ev else (b["accent_wagon"] if is_wagon else b["accent"])
+    category = story.get("category")
+    ribbon_label, accent_key = CATEGORY_RIBBON.get(category, (None, "accent"))
+    accent = b.get(accent_key, b["accent"])
 
     if story.get("bg_image") and Path(story["bg_image"]).exists():
         canvas = _photo_background(story["bg_image"])
@@ -94,7 +102,7 @@ def render_card(story, out_path, brand=None):
 
     d.rectangle([0, 0, SIZE, 12], fill=accent)
     d.text((M, 64), b["name"], font=_font("bold", 46), fill=b["text"])
-    d.text((M, 122), "DAILY CAR NEWS - REVIEWS - EV PERFORMANCE - WAGONS",
+    d.text((M, 122), "PERFORMANCE - RACING - WAGONS - DAILY",
            font=_font("semibold", 20), fill=b["muted"])
 
     src = story["source"].upper()
@@ -105,22 +113,11 @@ def render_card(story, out_path, brand=None):
     d.text((bx0 + 18, 78), src, font=bf, fill=(255, 255, 255))
 
     headline_top = 360
-    if is_ev:
-        rib = "EV PERFORMANCE"
+    if ribbon_label:
         rf = _font("bold", 28)
-        rw = d.textlength(rib, font=rf)
-        d.rounded_rectangle([M, 300, M + rw + 76, 352], radius=26, fill=accent)
-        bx, by = M + 26, 312
-        d.polygon([(bx + 9, by), (bx - 3, by + 20), (bx + 6, by + 20),
-                   (bx + 1, by + 32), (bx + 16, by + 11), (bx + 7, by + 11)], fill=(8, 9, 12))
-        d.text((M + 48, 308), rib, font=rf, fill=(8, 9, 12))
-        headline_top = 380
-    elif is_wagon:
-        rib = "WAGON WATCH"
-        rf = _font("bold", 28)
-        rw = d.textlength(rib, font=rf)
+        rw = d.textlength(ribbon_label, font=rf)
         d.rounded_rectangle([M, 300, M + rw + 44, 352], radius=26, fill=accent)
-        d.text((M + 22, 308), rib, font=rf, fill=(8, 9, 12))
+        d.text((M + 22, 308), ribbon_label, font=rf, fill=(8, 9, 12))
         headline_top = 380
 
     box_w = SIZE - 2 * M
