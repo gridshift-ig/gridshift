@@ -1,0 +1,30 @@
+name: Gridshift refresh token
+
+# Instagram long-lived tokens last ~60 days. This refreshes weekly and writes
+# the new token back into the IG_ACCESS_TOKEN secret so posting never breaks.
+# REQUIRES a secret GH_PAT: a fine-grained Personal Access Token scoped to this
+# repo with "Secrets: read and write". Without it, refresh by hand monthly.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refresh token and update the secret
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          NEW=$(python publish.py --refresh-token)
+          echo "::add-mask::$NEW"
+          if [ -z "$NEW" ]; then echo "Refresh failed"; exit 1; fi
+          echo "$NEW" | gh secret set IG_ACCESS_TOKEN --repo "${{ github.repository }}"
+          echo "Token refreshed and secret updated."
