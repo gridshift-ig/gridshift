@@ -1,12 +1,11 @@
 name: Gridshift auto-post
 
-# Posts car-news cards to Instagram on a schedule.
-# Times are UTC. Two batches/day, 3 posts each (one per category: performance,
-# racing, wagon) = 6 posts/day, ~2 per category. Adjust cron lines to taste.
+# Posts ONE car-news card to Instagram every 3 hours, 24/7 (8 posts/day).
+# The category rotates performance -> racing -> wagon by UTC hour, so a day
+# lands ~3 performance / 3 racing / 2 wagon. Times are UTC.
 on:
   schedule:
-    - cron: "0 13 * * *"   # morning batch (~9am ET / 6am PT)
-    - cron: "0 22 * * *"   # evening batch (~6pm ET / 3pm PT)
+    - cron: "0 */3 * * *"   # every 3 hours: 00,03,06,09,12,15,18,21 UTC
   workflow_dispatch:        # lets you run it manually from the Actions tab
 
 # Allow the job to push the generated images + history back to the repo.
@@ -32,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate a 3-post batch (one per category, perf backfill)
-        run: python generate.py --count 3
+      - name: Generate one post (category rotates by UTC hour)
+        run: python generate.py --count 1 --category auto
 
       - name: Commit generated images (so Instagram can fetch them)
         run: |
