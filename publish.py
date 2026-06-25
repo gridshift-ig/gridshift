@@ -1,26 +1,16 @@
 #!/usr/bin/env python3
 """Auto-publish a generated batch to Instagram via the Instagram Graph API
-(Instagram-login flow — graph.instagram.com).
+(Instagram-login flow - graph.instagram.com).
 
-Gridshift is set up with "Instagram API with Instagram login", so:
-  - tokens are Instagram User access tokens (start with "IGAA...")
-  - endpoints are on graph.instagram.com (NOT graph.facebook.com)
-  - long-lived tokens are refreshed with grant_type=ig_refresh_token
-    (no app secret needed)
-
-config.json needs:
-  ig_user_id      your Instagram user id (e.g. 17841447313301523)
+config.json (or GitHub secrets via env) needs:
+  ig_user_id      your Instagram user id
   access_token    the long-lived IGAA... token
   image_base_url  public base URL where each run's images are hosted
-                  (Meta fetches the image from a public URL; no file upload)
 
 Usage:
-  python publish.py --dir "posts/2026-06-25_1430"   # publish a batch
-  python publish.py --refresh-token                  # print a refreshed token
-  python publish.py --whoami                         # sanity check token/account
-
-Verify endpoints at https://developers.facebook.com/docs/instagram-platform
-— Meta changes these periodically.
+  python publish.py --dir "posts/2026-06-25_1430"
+  python publish.py --refresh-token
+  python publish.py --whoami
 """
 from __future__ import annotations
 
@@ -38,11 +28,6 @@ GRAPH_ROOT = "https://graph.instagram.com"
 
 
 def load_config() -> dict:
-    """Load config.json, then let environment variables override the secrets.
-
-    On GitHub Actions we inject IG_ACCESS_TOKEN / IG_USER_ID / IMAGE_BASE_URL as
-    secrets/vars so the real token is never committed. Locally, config.json is used.
-    """
     import os
     p = ROOT / "config.json"
     cfg = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
@@ -86,7 +71,6 @@ def publish_container(cfg: dict, creation_id: str) -> str:
 
 
 def refresh_long_lived_token(cfg: dict) -> str:
-    """Refresh a long-lived IG token (valid ~60 days). Run roughly monthly."""
     q = urllib.parse.urlencode({"grant_type": "ig_refresh_token", "access_token": cfg["access_token"]})
     out = _get(f"{GRAPH_ROOT}/refresh_access_token?{q}")
     return out["access_token"]
@@ -107,4 +91,39 @@ def publish_batch(run_dir: Path) -> None:
         caption = (run_dir / post["caption_file"]).read_text(encoding="utf-8")
         print(f"  post_{post['n']}: container... ({image_url})")
         cid = create_container(cfg, image_url, caption)
-        time.sleep
+        time.sleep(8)
+        media_id = publish_container(cfg, cid)
+        post["published"] = True
+        post["media_id"] = media_id
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        if post.get("link"):
+            posted_links.append(post["link"])
+        print(f"           published  media_id={media_id}")
+        time.sleep(5)
+
+    if posted_links:
+        from carnews.select import mark_posted
+        mark_posted(posted_links)
+    print("Batch complete.")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Publish a generated batch to Instagram.")
+    ap.add_argument("--dir", help="path to a posts/<run> folder")
+    ap.add_argument("--refresh-token", action="store_true", help="print a refreshed long-lived token")
+    ap.add_argument("--whoami", action="store_true", help="print the token's account id + username")
+    args = ap.parse_args()
+
+    if args.refresh_token:
+        print(refresh_long_lived_token(load_config()))
+        return
+    if args.whoami:
+        print(whoami(load_config()))
+        return
+    if not args.dir:
+        sys.exit("Pass --dir posts/<run> (or --refresh-token / --whoami).")
+    publish_batch(Path(args.dir))
+
+
+if __name__ == "__main__":
+    main()
