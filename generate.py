@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
-"""Generate a batch of review-ready Instagram posts from live car-news feeds.
+"""Generate review-ready Instagram posts from live car-news feeds.
 
-  python generate.py            # build today's batch (default 3 posts)
-  python generate.py --count 6  # 6 posts
+  python generate.py                          # 3-post batch (one per category)
+  python generate.py --count 1 --category auto  # single post, rotated by UTC hour
+  python generate.py --category racing          # single racing post (perf backfill)
 
-Each batch is one post per category (performance / racing / wagon). Empty
-racing or wagon slots are backfilled with an extra performance pick.
+Rotation: with --category auto, the category cycles performance -> racing ->
+wagon based on the UTC hour ((hour // 3) % 3), so 3-hourly runs spread the
+categories across the day. Empty racing/wagon slots backfill with performance.
 
 Output (one folder per run, under posts/<YYYY-MM-DD_HHMM>/):
-  post_1.jpg        branded card image (1080x1080)
-  post_1.txt        caption + hashtags, ready to paste
-  batch.json        machine-readable manifest (used by publish.py)
+  post_1.jpg  branded card | post_1.txt  caption | batch.json  manifest
 """
 from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from carnews.caption import build_caption
 from carnews.cards import render_card
 from carnews.feeds import fetch_all
-from carnews.select import select_category_batch
+from carnews.select import SLOTS, select_category_batch, select_for_slots
 
 ROOT = Path(__file__).resolve().parent
 
 
+def _rotated_category() -> str:
+    """Pick a category from SLOTS based on the current UTC hour."""
+    hour = datetime.now(timezone.utc).hour
+    return SLOTS[(hour // 3) % len(SLOTS)]
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Build a batch of Instagram car-news posts.")
+    ap = argparse.ArgumentParser(description="Build Instagram car-news posts.")
     ap.add_argument("--count", type=int, default=3,
-                    help="posts per batch (default 3 = one per category)")
+                    help="posts per batch when no --category (default 3)")
+    ap.add_argument("--category", choices=SLOTS + ["auto"], default=None,
+                    help="post a single story of this category; 'auto' rotates by UTC hour")
     args = ap.parse_args()
 
     print("Fetching feeds…")
@@ -41,7 +49,13 @@ def main() -> None:
         return
     print(f"\n{len(items)} stories from: {', '.join(ok_sources)}")
 
-    batch = select_category_batch(items, count=args.count)
+    if args.category:
+        cat = _rotated_category() if args.category == "auto" else args.category
+        print(f"Single-post run, category: {cat}")
+        batch = select_for_slots(items, [cat])[:1]
+    else:
+        batch = select_category_batch(items, count=args.count)
+
     if not batch:
         print("Nothing new to post (all candidates already posted).")
         return
@@ -71,7 +85,7 @@ def main() -> None:
         print(f"  post_{i}: [{story['source']}]{tag} {story['title'][:70]}")
 
     (run_dir / "batch.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    print(f"\nDone. {len(manifest)} posts in: {run_dir}")
+    print(f"\nDone. {len(manifest)} post(s) in: {run_dir}")
     print("Review them, then post manually or run:  python publish.py --dir \"%s\"" % run_dir)
 
 
