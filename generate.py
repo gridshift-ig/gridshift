@@ -9,6 +9,9 @@ Rotation: with --category auto, the category cycles performance -> racing ->
 wagon based on the UTC hour ((hour // 3) % 3), so 3-hourly runs spread the
 categories across the day. Empty racing/wagon slots backfill with performance.
 
+Pickup-truck stories are removed before selection per feeds.json "truck_filter"
+(default: drop ICE trucks, keep EV trucks).
+
 Output (one folder per run, under posts/<YYYY-MM-DD_HHMM>/):
   post_1.jpg  branded card | post_1.txt  caption | batch.json  manifest
 """
@@ -22,7 +25,7 @@ from pathlib import Path
 from carnews.caption import build_caption
 from carnews.cards import render_card
 from carnews.feeds import fetch_all
-from carnews.select import SLOTS, select_category_batch, select_for_slots
+from carnews.select import SLOTS, filter_trucks, select_category_batch, select_for_slots
 
 ROOT = Path(__file__).resolve().parent
 
@@ -48,6 +51,12 @@ def main() -> None:
         print("\nNo stories fetched. Check your internet connection and feeds.json.")
         return
     print(f"\n{len(items)} stories from: {', '.join(ok_sources)}")
+
+    before = len(items)
+    items = filter_trucks(items)
+    dropped = before - len(items)
+    if dropped:
+        print(f"Truck filter removed {dropped} story(ies).")
 
     if args.category:
         cat = _rotated_category() if args.category == "auto" else args.category
