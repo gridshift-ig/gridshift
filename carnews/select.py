@@ -9,6 +9,9 @@ The workflow runs once every 3 hours (24/7) and posts ONE story per run,
 rotating performance -> racing -> wagon across runs (see generate.py
 --category auto). Empty racing/wagon slots are BACKFILLED with a
 performance pick so every run still posts.
+
+Pickup-truck stories are removed up front by filter_trucks() per the
+feeds.json "truck_filter" block (default: drop ICE trucks, keep EV trucks).
 """
 from __future__ import annotations
 
@@ -42,6 +45,46 @@ def _terms(cat: str) -> list:
     return [t.lower() for t in CATS.get(cat, {}).get("terms", [])]
 
 
+# --- Truck filter -----------------------------------------------------------
+TRUCK_FILTER = CONFIG.get("truck_filter", {})
+
+
+def _is_truck(hay: str) -> bool:
+    terms = [t.lower() for t in TRUCK_FILTER.get("truck_terms", [])]
+    return any(_word_hit(hay, t) for t in terms)
+
+
+def _is_ev(hay: str) -> bool:
+    terms = [t.lower() for t in TRUCK_FILTER.get("ev_terms", [])]
+    return any(_word_hit(hay, t) for t in terms)
+
+
+def filter_trucks(items: list) -> list:
+    """Drop pickup-truck stories per feeds.json -> truck_filter.
+
+    mode 'ice_only' (default): drop trucks with no EV signal, keep EV trucks.
+    mode 'all': drop every truck regardless of powertrain.
+    mode 'off' / anything else: no filtering.
+    Each dropped item is flagged it['filtered_out'] = 'ice_truck' | 'truck'.
+    """
+    mode = TRUCK_FILTER.get("mode", "off")
+    if mode not in ("ice_only", "all"):
+        return items
+    kept: list = []
+    for it in items:
+        h = _hay(it)
+        if _is_truck(h):
+            if mode == "all":
+                it["filtered_out"] = "truck"
+                continue
+            if not _is_ev(h):  # ice_only: gas truck -> drop
+                it["filtered_out"] = "ice_truck"
+                continue
+        kept.append(it)
+    return kept
+
+
+# --- Categorization ---------------------------------------------------------
 def categorize(items: list) -> None:
     """Assign each item a single primary category (it['category']).
 
