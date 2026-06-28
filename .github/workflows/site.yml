@@ -40,7 +40,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build site
-        run: python build_site.py --per-category 12 --out site/index.html
+        run: python build_site.py --out-dir site
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
