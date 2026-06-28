@@ -118,6 +118,22 @@
       "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCLgEVx4mzk3T3mzgbKG54Eg",
       "homepage": "https://www.youtube.com/@Hagerty",
       "verified": true
+    },
+    {
+      "id": "edmunds_news",
+      "name": "Edmunds",
+      "url": "https://www.edmunds.com/feeds/rss/car-news.xml",
+      "homepage": "https://www.edmunds.com/car-news/",
+      "verified": true,
+      "note": "Edmunds Car News feed (official, confirmed working 2026-06-28)."
+    },
+    {
+      "id": "edmunds_reviews",
+      "name": "Edmunds Reviews",
+      "url": "https://www.edmunds.com/feeds/rss/articles.xml",
+      "homepage": "https://www.edmunds.com/car-reviews/",
+      "verified": true,
+      "note": "Edmunds Reviews & Articles feed (official)."
     }
   ],
   "truck_filter": {

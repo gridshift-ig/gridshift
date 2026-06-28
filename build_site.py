@@ -47,6 +47,48 @@ HOME_PER_CAT = 9        # cards per category shown on the homepage
 CAT_PER_PAGE = 60       # cards on each category page
 ARCHIVE_MAX = 150       # cards on the archive page
 
+# Curated "Iconic Wagons" comparison (evergreen). Specs verified 2026-06-28
+# from Edmunds / manufacturer / automobile-catalog / encyCARpedia; figures are
+# manufacturer or independent-test values and vary by model year & market.
+# "~" marks an approximate or market-dependent figure. Sorted by power.
+WAGON_COMPARE = [
+    {"name": "BMW M5 Touring", "years": "2025\u2013", "engine": "4.4L twin-turbo V8 PHEV",
+     "power": "717 hp", "torque": "738 lb-ft", "zero60": "3.4 s", "weight": "5,530 lb",
+     "length": "200.6 in", "drive": "AWD",
+     "url": "https://www.hagerty.com/media/new-car-reviews/2025-bmw-m5-touring-review-fresh-flavor/"},
+    {"name": "Mercedes-AMG E63 S Wagon", "years": "2018\u2013", "engine": "4.0L twin-turbo V8",
+     "power": "603 hp", "torque": "627 lb-ft", "zero60": "3.4 s", "weight": "4,669 lb",
+     "length": "196.3 in", "drive": "AWD",
+     "url": "https://www.edmunds.com/mercedes-benz/e-class/2018/wagon/st-401733951/features-specs/"},
+    {"name": "Audi RS6 Avant", "years": "2021\u2013", "engine": "4.0L twin-turbo V8",
+     "power": "591 hp", "torque": "590 lb-ft", "zero60": "3.3 s", "weight": "~5,000 lb",
+     "length": "196.7 in", "drive": "AWD",
+     "url": "https://www.edmunds.com/car-news/tested-2021-audi-rs-6-is-one-fast-wagon.html"},
+    {"name": "Porsche Panamera Turbo S E-Hybrid Sport Turismo", "years": "2018\u2013",
+     "engine": "4.0L twin-turbo V8 PHEV", "power": "~690 hp", "torque": "\u2014",
+     "zero60": "~3.0 s", "weight": "~5,250 lb", "length": "198.8 in", "drive": "AWD",
+     "url": "https://www.automobile-catalog.com/car/2019/2873075/porsche_panamera_turbo_s_e-hybrid_sport_turismo.html"},
+    {"name": "Cadillac CTS-V Sport Wagon", "years": "2011\u201314", "engine": "6.2L supercharged V8",
+     "power": "556 hp", "torque": "551 lb-ft", "zero60": "3.9 s", "weight": "4,497 lb",
+     "length": "192.0 in", "drive": "RWD",
+     "url": "https://www.edmunds.com/cadillac/cts-v-wagon/2014/review/"},
+    {"name": "Mercedes E55 AMG Wagon", "years": "2003\u201306", "engine": "5.4L supercharged V8",
+     "power": "469 hp", "torque": "516 lb-ft", "zero60": "4.1 s", "weight": "4,222 lb",
+     "length": "191.8 in", "drive": "RWD",
+     "url": "https://www.edmunds.com/mercedes-benz/e-class/2005/e55-amg/features-specs/"},
+    {"name": "Audi RS2 Avant", "years": "1994\u201395", "engine": "2.2L turbo inline-5",
+     "power": "311 hp", "torque": "302 lb-ft", "zero60": "~5.0 s", "weight": "~3,500 lb",
+     "length": "~176 in", "drive": "AWD",
+     "url": "https://en.wikipedia.org/wiki/Audi_RS_2_Avant"},
+    {"name": "Volvo 850 R Wagon", "years": "1996\u201397", "engine": "2.3L turbo inline-5",
+     "power": "247 hp", "torque": "258 lb-ft", "zero60": "6.7 s", "weight": "3,311 lb",
+     "length": "185.4 in", "drive": "FWD",
+     "url": "https://www.encycarpedia.com/us/volvo/96-850-r-wagon"},
+]
+WAGON_COMPARE_NOTE = ("Specs are manufacturer or independent-test figures and vary by model "
+    "year and market; \u201c~\u201d marks an approximate value. Verify against the linked "
+    "source for a specific car.")
+
 
 def _esc(s: str) -> str:
     return html.escape(s or "", quote=True)
@@ -162,6 +204,18 @@ nav a.on{color:#fff;border-color:var(--a);box-shadow:inset 0 -2px 0 var(--a)}
 .card h3{font-size:16px;font-weight:700;line-height:1.3}
 .meta{margin-top:auto;color:var(--muted);font-size:12px}
 .ovtext .meta{color:#cfd4de}
+.cmp-section{padding-top:8px}
+.cmp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table.cmp{border-collapse:collapse;width:100%;min-width:820px;font-size:14px}
+table.cmp th,table.cmp td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+table.cmp thead th{background:#12151d;color:#f0b030;font-size:12px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0}
+table.cmp tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+table.cmp tbody tr:hover{background:rgba(240,176,48,.07)}
+table.cmp td.num{font-variant-numeric:tabular-nums;color:#dfe4ee}
+table.cmp td.cmp-name{white-space:normal;min-width:180px;font-weight:700}
+table.cmp td.cmp-name a{color:#fff}
+table.cmp td.cmp-name a:hover{color:#f0b030}
+.cmp-note{color:var(--muted);font-size:12px;margin:10px 2px 0}
 footer{border-top:1px solid var(--line);margin-top:40px;padding:26px 0;color:var(--muted);font-size:13px}
 footer a{color:#cdd3de;text-decoration:underline}
 .note{margin-top:8px;font-size:12px;opacity:.8}
@@ -238,12 +292,43 @@ def _home_body(buckets: dict) -> tuple[str, str | None]:
     return "\n".join(parts), hero_link
 
 
+def _wagon_compare_html() -> str:
+    """Curated, evergreen side-by-side spec table for iconic wagons."""
+    head = ("<tr><th>Wagon</th><th>Years</th><th>Engine</th><th>Power</th>"
+            "<th>Torque</th><th>0\u201360</th><th>Weight</th><th>Length</th><th>Drive</th></tr>")
+    rows = []
+    for w in WAGON_COMPARE:
+        name = (f'<a href="{_esc(w["url"])}" target="_blank" rel="noopener noreferrer nofollow">'
+                f'{_esc(w["name"])} &rarr;</a>')
+        rows.append(
+            "<tr>"
+            f'<td class="cmp-name">{name}</td>'
+            f'<td>{_esc(w["years"])}</td>'
+            f'<td>{_esc(w["engine"])}</td>'
+            f'<td class="num">{_esc(w["power"])}</td>'
+            f'<td class="num">{_esc(w["torque"])}</td>'
+            f'<td class="num">{_esc(w["zero60"])}</td>'
+            f'<td class="num">{_esc(w["weight"])}</td>'
+            f'<td class="num">{_esc(w["length"])}</td>'
+            f'<td>{_esc(w["drive"])}</td>'
+            "</tr>")
+    return (f'<section class="cmp-section" id="compare">'
+            f'<div class="pagehead" style="--a:{ACCENTS["wagon"]}">'
+            f'<h1>Iconic Wagons &middot; Side-by-Side</h1>'
+            f'<p>Notable performance wagons, sorted by power. Each name links to a full source review.</p></div>'
+            f'<div class="cmp-wrap"><table class="cmp"><thead>{head}</thead><tbody>'
+            + "".join(rows) +
+            f'</tbody></table></div>'
+            f'<p class="cmp-note">{WAGON_COMPARE_NOTE}</p></section>')
+
+
 def _category_body(cat: str, stories: list) -> str:
+    pre = _wagon_compare_html() if cat == "wagon" else ""
     if not stories:
-        return f'<div class="pagehead" style="--a:{ACCENTS[cat]}"><h1>{CAT_LABELS[cat]}</h1><p>No stories right now — check back soon.</p></div>'
+        return pre + f'<div class="pagehead" style="--a:{ACCENTS[cat]}"><h1>{CAT_LABELS[cat]}</h1><p>No stories right now — check back soon.</p></div>'
     lead = _overlay_card(stories[0], cat, "card lead")
     rest = "\n".join(_grid_card(s, cat) for s in stories[1:])
-    return f"""<div class="pagehead" style="--a:{ACCENTS[cat]}"><h1>{CAT_LABELS[cat]}</h1><p>{len(stories)} latest stories · each links to the original source.</p></div>
+    return pre + f"""<div class="pagehead" style="--a:{ACCENTS[cat]}"><h1>{CAT_LABELS[cat]}</h1><p>{len(stories)} latest stories · each links to the original source.</p></div>
 <div class="grid">
 {lead}
 {rest}
