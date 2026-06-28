@@ -95,7 +95,17 @@ def categorize(items: list) -> None:
     term_map = {c: _terms(c) for c in CATS if not c.startswith("_")}
     for it in items:
         h = _hay(it)
-        matched = [c for c, terms in term_map.items() if any(_word_hit(h, t) for t in terms)]
+        # Wagon is high-precision: only count a story as a wagon if the
+        # HEADLINE itself names it one (wagon/estate/avant/longroof/etc.).
+        # Matching the body/excerpt pulled in non-wagons (supercars, SUV
+        # "variants", concept "caravans", V8 round-ups that merely mention
+        # wagons), so wagon matches the title only.
+        title_h = (it.get("title", "") or "").lower()
+        matched = []
+        for c, terms in term_map.items():
+            hay = title_h if c == "wagon" else h
+            if any(_word_hit(hay, t) for t in terms):
+                matched.append(c)
         it["categories_matched"] = matched
         cat = None
         for c in ORDER:
