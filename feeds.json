@@ -231,23 +231,23 @@
       "terms": [
         "wagon",
         "wagons",
+        "station wagon",
         "estate",
         "estate car",
         "avant",
-        "touring",
-        "shooting brake",
         "sportwagen",
         "sport wagen",
         "sportbrake",
-        "allroad",
-        "alltrack",
-        "outback",
-        "cross country",
-        "variant",
-        "caravan",
+        "shooting brake",
         "longroof",
         "long roof",
-        "station wagon"
+        "allroad",
+        "alltrack",
+        "cross country",
+        "outback",
+        "series touring",
+        "touring wagon",
+        "touring estate"
       ]
     },
     "performance": {
