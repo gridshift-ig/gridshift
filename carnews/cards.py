@@ -69,7 +69,10 @@ def _photo_background(path):
     img = img.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s)).resize((SIZE, SIZE))
     overlay = Image.new("L", (1, SIZE))
     for y in range(SIZE):
-        overlay.putpixel((0, y), int(235 * (y / SIZE) ** 1.4))
+        t = y / SIZE
+        bottom = 235 * (t ** 1.4)            # darken toward headline + footer
+        top = 150 * max(0.0, 1 - t / 0.17)   # scrim so the GRIDSHIFT header stays legible
+        overlay.putpixel((0, y), int(min(255, max(bottom, top))))
     overlay = overlay.resize((SIZE, SIZE))
     return Image.composite(Image.new("RGB", (SIZE, SIZE), (8, 9, 12)), img, overlay)
 
