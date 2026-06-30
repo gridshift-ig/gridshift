@@ -19,15 +19,43 @@ from __future__ import annotations
 
 import argparse
 import json
+import urllib.request
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 
 from carnews.caption import build_caption
 from carnews.cards import render_card
-from carnews.feeds import fetch_all
+from carnews.feeds import USER_AGENT, fetch_all
 from carnews.select import SLOTS, filter_trucks, select_category_batch, select_for_slots
 
 ROOT = Path(__file__).resolve().parent
+
+MIN_PHOTO_PX = 500  # skip logos / tracking pixels / tiny thumbs
+
+
+def _download_photo(url, dest):
+    """Download a story's publisher photo for use as the card background.
+
+    Returns the saved path on success, else None (caller falls back to the
+    branded gradient). Mirrors the website's use of the same RSS image.
+    """
+    if not url:
+        return None
+    try:
+        from PIL import Image
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = resp.read()
+        Image.open(BytesIO(data)).verify()          # validate it is a real image
+        img = Image.open(BytesIO(data))             # reopen (verify exhausts it)
+        if min(img.size) < MIN_PHOTO_PX:            # too small to fill a 1080 card
+            return None
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        img.convert("RGB").save(dest, "JPEG", quality=92)
+        return dest
+    except Exception:
+        return None
 
 
 def _rotated_category() -> str:
@@ -75,6 +103,9 @@ def main() -> None:
     manifest = []
     for i, story in enumerate(batch, 1):
         story["footer"] = "Full story — link in bio"
+        bg = _download_photo(story.get("image", ""), run_dir / f"src_{i}.jpg")
+        if bg:
+            story["bg_image"] = str(bg)
         img = render_card(story, run_dir / f"post_{i}.jpg")
         caption = build_caption(story)
         (run_dir / f"post_{i}.txt").write_text(caption, encoding="utf-8")
@@ -86,6 +117,7 @@ def main() -> None:
                 "link": story["link"],
                 "category": story.get("category"),
                 "image_file": img.name,
+                "photo": bool(story.get("bg_image")),
                 "caption_file": f"post_{i}.txt",
                 "published": False,
             }

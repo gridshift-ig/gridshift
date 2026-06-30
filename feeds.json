@@ -120,6 +120,14 @@
       "verified": true
     },
     {
+      "id": "yt_fiawec",
+      "name": "FIA WEC",
+      "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCwU7U7PiarcJKLjDJTnANjw",
+      "homepage": "https://www.youtube.com/@FIAWEC",
+      "verified": true,
+      "note": "Official FIA World Endurance Championship YouTube; titles categorize as Racing via wec/le mans/race terms."
+    },
+    {
       "id": "edmunds_news",
       "name": "Edmunds",
       "url": "https://www.edmunds.com/feeds/rss/car-news.xml",
