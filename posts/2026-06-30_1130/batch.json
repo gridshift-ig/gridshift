@@ -7,6 +7,7 @@
     "category": "performance",
     "image_file": "post_1.jpg",
     "caption_file": "post_1.txt",
-    "published": false
+    "published": true,
+    "media_id": "17940866055054518"
   }
 ]
