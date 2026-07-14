@@ -8,6 +8,7 @@
     "image_file": "post_1.jpg",
     "photo": true,
     "caption_file": "post_1.txt",
-    "published": false
+    "published": true,
+    "media_id": "17885417973438335"
   }
 ]
